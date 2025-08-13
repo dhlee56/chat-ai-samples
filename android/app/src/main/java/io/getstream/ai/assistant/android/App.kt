@@ -16,6 +16,7 @@
 package io.getstream.ai.assistant.android
 
 import android.app.Application
+import android.util.Log
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.models.ConnectionData
@@ -52,7 +53,9 @@ class App : Application() {
       ),
       appContext = applicationContext
     )
-    val chatClient = ChatClient.Builder("zcgvnykxsfm8", applicationContext)
+    //"re8cffzh4rh9"
+    val apiKey = BuildConfig.STREAM_API_KEY
+    val chatClient = ChatClient.Builder( apiKey, applicationContext)
       .withPlugins(offlinePluginFactory, statePluginFactory)
       .logLevel(logLevel)
       .build()
@@ -64,15 +67,15 @@ class App : Application() {
     )
 
     // https://getstream.io/chat/docs/php/token_generator/
-    val token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQUlTdHJlYW1Vc2VyMSJ9.3Kb4ZfCJIG02M24eqOR4SdNmouq1SgXGu-_4pBKEjjI"
-    chatClient.connectUser(user, token).enqueue(object : Call.Callback<ConnectionData> {
+    //val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQUlTdHJlYW1Vc2VyMSJ9.xdtK3Pe3LK1PfS-xr_bi3lM-i96CZZrvc0V980XmKB8"
+    val userToken = BuildConfig.STREAM_USER_TOKEN
+    chatClient.connectUser(user, userToken).enqueue(object : Call.Callback<ConnectionData> {
       override fun onResult(result: io.getstream.result.Result<ConnectionData>) {
         if (result.isFailure) {
-          streamLog {
+          Log.d("KOTLINCLASS",
             "Can't connect user. Please check the app README.md and ensure " +
               "**Disable Auth Checks** is ON in the Dashboard"
-          }
+          )
         }
       }
     })

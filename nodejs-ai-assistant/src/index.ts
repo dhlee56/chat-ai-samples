@@ -3,7 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import { AIAgent } from './agents/types';
 import { createAgent } from './agents/createAgent';
-import { apiKey, serverClient } from './serverClient';
+import { apiKey, apiSecret, serverClient } from './serverClient';
+import { Stream } from 'openai/streaming';
+import { StreamChat } from 'stream-chat';
 
 const app = express();
 app.use(express.json());
@@ -35,6 +37,16 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/token', (req, res) => {
+  if(req.query.user_id) {
+    const serverClient = StreamChat.getInstance(apiKey, apiSecret);
+    const token = serverClient.createToken(req.query.user_id as string);
+    res.json({ token });
+  } else {
+    res.status(400).json({ error: 'Missing user_id query parameter' });
+  }
+})
+
 /**
  * Handle the request to start the AI Agent
  */
@@ -43,14 +55,22 @@ app.post('/start-ai-agent', async (req, res) => {
     channel_id,
     channel_type = 'messaging',
     platform = 'anthropic',
+    //platform = 'openai',
   } = req.body;
+
+  console.log('Received request to start AI Agent', {
+    channel_id,
+    channel_type,
+    platform,
+  });
 
   // Simple validation
   if (!channel_id) {
     res.status(400).json({ error: 'Missing required fields' });
     return;
   }
-
+  console.log('Channel ID:', channel_id);
+  
   let channel_id_updated = channel_id;
   if (channel_id.includes(':')) {
     const parts = channel_id.split(':');
@@ -58,6 +78,8 @@ app.post('/start-ai-agent', async (req, res) => {
       channel_id_updated = parts[1];
     }
   }
+
+  console.log('Updated channel_id:', channel_id_updated);
 
   const user_id = `ai-bot-${channel_id_updated.replace(/!/g, '')}`;
   try {
@@ -69,7 +91,7 @@ app.post('/start-ai-agent', async (req, res) => {
         name: 'AI Bot',
         role: 'admin',
       });
-      const channel = serverClient.channel(channel_type, channel_id_updated);
+      const channel = serverClient.channel(channel_type, channel_id_updated)     
       try {
         await channel.addMembers([user_id]);
       } catch (error) {
@@ -98,10 +120,10 @@ app.post('/start-ai-agent', async (req, res) => {
     res.json({ message: 'AI Agent started', data: [] });
   } catch (error) {
     const errorMessage = (error as Error).message;
-    console.error('Failed to start AI Agent', errorMessage);
+    console.error('Failed to start AI Agent 1 ', errorMessage);
     res
       .status(500)
-      .json({ error: 'Failed to start AI Agent', reason: errorMessage });
+      .json({ error: 'Failed to start AI Agent 2 ', reason: errorMessage });
   } finally {
     pendingAiAgents.delete(user_id);
   }

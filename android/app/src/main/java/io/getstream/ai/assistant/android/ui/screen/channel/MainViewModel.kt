@@ -36,6 +36,7 @@ class MainViewModel : ViewModel() {
         extraData = mapOf()
       ).await().onSuccess {
         streamLog { "Created a new channel" }
+        println("KOTLINCLASS: a new channel created: ${it.cid}")
       }.onError {
         streamLog { "error: $it" }
       }

@@ -24,7 +24,7 @@ import retrofit2.create
 object NetworkModule {
 
   private val retrofit = Retrofit.Builder()
-    .baseUrl("http://192.168.50.248:3000/")
+    .baseUrl("http://155.230.24.83:3000/")
     .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
     .build()
 

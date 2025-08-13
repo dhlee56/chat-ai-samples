@@ -21,14 +21,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.chat.android.ai.assistant.AiMessagesScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
-import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
+//import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 
 class MessageActivity : ComponentActivity() {
 
@@ -50,9 +51,10 @@ class MessageActivity : ComponentActivity() {
       ChatTheme {
         val isAiStarted by messageViewModel.isAiStarted.collectAsStateWithLifecycle()
         val typingState by messageViewModel.typingState.collectAsStateWithLifecycle()
-
-        Box(modifier = Modifier.fillMaxSize()) {
-          AiMessagesScreen(
+        Box(modifier = Modifier.fillMaxSize()
+          .background(Color.Green)
+        ) {
+          MyAiMessagesScreen(
             isAiStarted = isAiStarted,
             viewModelFactory = viewModelFactory,
             onStartAiAssistant = { messageViewModel.startAiAssistant(cid = cid) },

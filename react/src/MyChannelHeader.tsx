@@ -1,10 +1,11 @@
-import { useChannelStateContext } from 'stream-chat-react';
+import { useChannelStateContext, useChatContext } from 'stream-chat-react';
 import { useWatchers } from './useWatchers';
+import createChannel from './createChannel';
 
-export default function MyChannelHeader() {
+export default function MyChannelHeader({ channelName }: { channelName: string }) {
   const { channel } = useChannelStateContext();
   const { watchers } = useWatchers({ channel });
-
+  const { client } = useChatContext()
   const aiInChannel =
     (watchers ?? []).filter((watcher) => watcher.includes('ai-bot')).length > 0;
   return (
@@ -13,6 +14,9 @@ export default function MyChannelHeader() {
 
       <button onClick={addOrRemoveAgent}>
         {aiInChannel ? 'Remove AI' : 'Add AI'}
+      </button>
+      <button onClick = {() => createChannel(client, channelName)}>
+        Create Channel
       </button>
     </div>
   );

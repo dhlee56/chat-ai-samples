@@ -74,7 +74,7 @@ export class OpenAIAgent implements AIAgent {
       console.log('OpenAI not initialized');
       return;
     }
-
+  
     if (!e.message || e.message.ai_generated) {
       console.log('Skip handling ai generated message');
       return;

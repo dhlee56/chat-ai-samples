@@ -16,4 +16,11 @@
 -->
 <resources>
     <string name="app_name">ai-assistant-android</string>
+    <string name="stream_compose_selected_channel_menu_delete_conversation_confirmation_title">delete confirmation title</string>
+  <string name="stream_compose_selected_channel_menu_leave_group_confirmation_title">confirmation_title</string>
+  <string name="stream_compose_selected_channel_menu_leave_group_confirmation_message">confirmation_message</string>
+  <string name="stream_compose_thread_reply">stream compose thread reply</string>
+  <plurals name="stream_compose_message_list_thread_footnote">stream compose message list thread
+    footnote
+  </plurals>
 </resources>

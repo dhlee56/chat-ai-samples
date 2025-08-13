@@ -13,17 +13,24 @@ import {
   MessageList,
   Thread,
   Window,
+  AIStateIndicator,
+  ChannelHeader,
+  Message,
+  defaultRenderMessages,
+  MessageRenderer
 } from 'stream-chat-react';
+import styled from 'styled-components';
 
 import 'stream-chat-react/dist/css/v2/index.css';
 import MyChannelHeader from './MyChannelHeader';
 import MyAIStateIndicator from './MyAIStateIndicator';
+import type { Message as StreamMessage } from 'stream-chat';
 
 // your Stream app information
-const apiKey = process.env.STREAM_API_KEY;
-const userToken = process.env.STREAM_TOKEN;
-const userId = 'anakin_skywalker';
-const userName = 'Anakin Skywalker';
+const apiKey = import.meta.env.VITE_STREAM_API_KEY;
+const userToken = import.meta.env.VITE_STREAM_TOKEN;
+const userId = import.meta.env.VITE_STREAM_USER_ID || 'AIStreamUser1';
+const userName = import.meta.env.VITE_STREAM_USER_NAME || 'Dong Lee';
 
 if (!apiKey || !userToken) {
   throw new Error('Missing API key or user token');
@@ -54,15 +61,71 @@ const App = () => {
 
   if (!client) return <div>Setting up client & connection...</div>;
 
+const CustomMessage = ({ message }: { message: StreamMessage }) => {
   return (
-    <Chat client={client}>
+    <div style={{
+      width: '100%',
+      maxWidth: '100%',
+      padding: '10px',
+      margin: '5px 0',
+    }}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <div>{message.user?.name}</div>
+        <div style={{
+          backgroundColor: '#f1f1f1',
+          padding: '10px',
+          borderRadius: '8px',
+          width: '100%',
+        }}>
+          {message.text}
+        </div>
+      </div>
+    </div>
+  );
+};
+  const customRenderMessages: MessageRenderer = (options) => {
+    const elements = defaultRenderMessages(options);
+    elements.push(<li key="caught-up">You're all caught up!</li>);
+    return elements;
+  };
+  const ResponsiveMessageList = styled(MessageList)`
+    .str-chat__message-list {
+      max-width: 100% !important;
+      padding: 0 20px;
+    }
+
+    .str-chat__message-text {
+      max-width: 100% !important;
+      
+      @media (min-width: 768px) {
+        max-width: 70% !important;
+      }
+
+      @media (min-width: 1024px) {
+        max-width: 80% !important;
+      }
+
+      @media (min-width: 1440px) {
+        max-width: 90% !important;
+      }
+    }
+  `;
+// Use a valid theme string for the Chat component
+const theme = 'messaging light';
+const channelName = 'ai-chat-channel-again';
+return (
+  <Chat client={client}>
       <ChannelList filters={filters} sort={sort} options={options} />
       <Channel>
         <Window>
-          <MyChannelHeader />
-          <MessageList />
+          <MyChannelHeader channelName={channelName}/>
+          <ResponsiveMessageList/>   
+          {/* <ChannelHeader /> */}
           <MyAIStateIndicator />
-          <MessageInput />
+          <MessageInput/>
         </Window>
         <Thread />
       </Channel>

@@ -41,6 +41,18 @@ android {
     versionName = "1.0"
     buildConfigField("String", "STREAM_API_KEY", localProperties["STREAM_API_KEY"].toString())
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    //load the values from .properties file
+    val keystoreFile = project.rootProject.file("apiKeys.properties")
+    val properties = Properties()
+    properties.load(keystoreFile.inputStream())
+
+    //return empty key in case something goes wrong
+    val apiKey = properties.getProperty("STREAM_API_KEY") ?: ""
+    val userToken = properties.getProperty("STREAM_USER_TOKEN") ?: ""
+    buildConfigField("String", "STREAM_API_KEY", apiKey)
+    buildConfigField("String", "STREAM_USER_TOKEN", userToken)
+
   }
 
   compileOptions {

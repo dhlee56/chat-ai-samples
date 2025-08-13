@@ -13,12 +13,15 @@ export class AnthropicResponseHandler {
     private readonly channel: Channel,
     private readonly message: MessageResponse,
   ) {
+    console.log('AnthropicResponseHandler initialized');
     this.chatClient.on('ai_indicator.stop', this.handleStopGenerating);
   }
 
   run = async () => {
+    console.log('Running AnthropicResponseHandler');
     try {
       for await (const messageStreamEvent of this.anthropicStream) {
+        console.log('Received message stream event:', messageStreamEvent);
         await this.handle(messageStreamEvent);
       }
     } catch (error) {
@@ -56,6 +59,7 @@ export class AnthropicResponseHandler {
   ) => {
     switch (messageStreamEvent.type) {
       case 'content_block_start':
+        console.log('Content block start');
         await this.channel.sendEvent({
           type: 'ai_indicator.update',
           ai_state: 'AI_STATE_GENERATING',
@@ -63,8 +67,10 @@ export class AnthropicResponseHandler {
         });
         break;
       case 'content_block_delta':
+        console.log('Content block delta');
         if (messageStreamEvent.delta.type !== 'text_delta') break;
         this.message_text += messageStreamEvent.delta.text;
+        console.log("Message text delta:", messageStreamEvent.delta.text);
         this.chunk_counter++;
         if (
           this.chunk_counter % 20 === 0 ||
@@ -80,10 +86,13 @@ export class AnthropicResponseHandler {
         }
         break;
       case 'message_delta':
+        console.log('Message delta: ', this.message_text);
         await this.chatClient.partialUpdateMessage(this.message.id, {
           set: { text: this.message_text, generating: false },
         });
+        break;
       case 'message_stop':
+        console.log('Message stop');
         await new Promise((resolve) => setTimeout(resolve, 500));
         await this.chatClient.partialUpdateMessage(this.message.id, {
           set: { text: this.message_text, generating: false },

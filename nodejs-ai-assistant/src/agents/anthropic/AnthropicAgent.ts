@@ -32,9 +32,11 @@ export class AnthropicAgent implements AIAgent {
     this.anthropic = new Anthropic({ apiKey });
 
     this.chatClient.on('message.new', this.handleMessage);
+    console.log('Anthropic Agent initialized');
   };
 
   private handleMessage = async (e: Event<DefaultGenerics>) => {
+    console.log('Handling new message event:', e.type);
     if (!this.anthropic) {
       console.error('Anthropic SDK is not initialized');
       return;
@@ -47,6 +49,7 @@ export class AnthropicAgent implements AIAgent {
 
     const message = e.message.text;
     if (!message) return;
+    console.log('Received message:', message);
 
     this.lastInteractionTs = Date.now();
 
@@ -58,7 +61,10 @@ export class AnthropicAgent implements AIAgent {
         content: message.text || '',
       }));
 
+      console.log('# of Messages to send to Anthropic:', messages.length);
+
     if (e.message.parent_id !== undefined) {
+      console.log('Message is a reply, adding parent message');
       messages.push({
         role: 'user',
         content: message,
@@ -72,11 +78,18 @@ export class AnthropicAgent implements AIAgent {
       stream: true,
     });
 
+    if (!anthropicStream) {
+      console.error('Failed to create Anthropic message stream');
+      return;
+    }
+    console.log('Anthropic message stream created:', anthropicStream);
     const { message: channelMessage } = await this.channel.sendMessage({
       text: '',
       ai_generated: true,
     });
 
+    console.log('Channel message sent:', channelMessage);
+    
     try {
       await this.channel.sendEvent({
         type: 'ai_indicator.update',
@@ -95,7 +108,7 @@ export class AnthropicAgent implements AIAgent {
       this.channel,
       channelMessage,
     );
-    void handler.run();
+    handler.run();
     this.handlers.push(handler);
   };
 }

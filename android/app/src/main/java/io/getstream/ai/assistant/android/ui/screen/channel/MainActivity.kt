@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,32 +33,56 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.ai.assistant.android.R
 import io.getstream.ai.assistant.android.ui.screen.messages.MessageActivity
 import io.getstream.chat.android.client.ChatClient
-import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
+import io.getstream.chat.android.compose.viewmodel.channels.ChannelViewModelFactory
+import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.InitializationState
+import io.getstream.chat.android.models.querysort.QuerySortByField
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
 
   private val mainViewModel: MainViewModel by viewModels()
-
+  private val factory by lazy {
+    ChannelViewModelFactory(
+      chatClient = ChatClient.instance(),
+      querySort = QuerySortByField.descByName("last_updated"),
+//      filters = //Filters.eq("type", "messaging"),
+//                Filters.`in`(fieldName = "type", values = listOf(
+//                    "gaming", "messaging", "commerce", "team", "livestream"
+//                )),
+      filters = Filters.and(
+          Filters.eq("type", "messaging"),
+          Filters.`in`("members", listOf("AIStreamUser1"))
+      ),
+      messageLimit = 5
+    )
+  }
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     setContent {
       val clientInitialisationState
-        by ChatClient.instance().clientState.initializationState.collectAsStateWithLifecycle()
+        by ChatClient.instance()
+          .clientState
+          .initializationState
+          .collectAsStateWithLifecycle()
 
+      val scope = rememberCoroutineScope()
+      println("KOTLINCLASS: State: $clientInitialisationState")
       when (clientInitialisationState) {
         InitializationState.COMPLETE -> {
           ChatTheme {
             ChannelsScreen(
+              viewModelFactory = factory,
               title = stringResource(id = R.string.app_name),
               isShowingHeader = true,
               onHeaderActionClick = { mainViewModel.createChannel() },
               onChannelClick = { channel ->
                 startActivity(MessageActivity.getIntent(this, channel.cid))
               },
-              onBackPressed = { finish() }
+              onBackPressed = { finish() },
+              searchMode = SearchMode.Channels
             )
           }
         }
@@ -76,3 +102,4 @@ class MainActivity : ComponentActivity() {
     }
   }
 }
+
