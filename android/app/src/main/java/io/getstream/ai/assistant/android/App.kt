@@ -53,7 +53,6 @@ class App : Application() {
       ),
       appContext = applicationContext
     )
-    //"re8cffzh4rh9"
     val apiKey = BuildConfig.STREAM_API_KEY
     val chatClient = ChatClient.Builder( apiKey, applicationContext)
       .withPlugins(offlinePluginFactory, statePluginFactory)
@@ -67,7 +66,6 @@ class App : Application() {
     )
 
     // https://getstream.io/chat/docs/php/token_generator/
-    //val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQUlTdHJlYW1Vc2VyMSJ9.xdtK3Pe3LK1PfS-xr_bi3lM-i96CZZrvc0V980XmKB8"
     val userToken = BuildConfig.STREAM_USER_TOKEN
     chatClient.connectUser(user, userToken).enqueue(object : Call.Callback<ConnectionData> {
       override fun onResult(result: io.getstream.result.Result<ConnectionData>) {
